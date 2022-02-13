@@ -1,18 +1,48 @@
 extensions [gis ]
 
 breed [ birds bird ]
+breed [boats boat]
 
-globals [ af_borders ]
+globals [ af_borders colonie-sf epinect]
 
 patches-own [
  countryName
+ epinect-value
+]
+
+birds-own [
+ memory          ; success location fishing zone
+ foragingTarget  ; objectif before turning back to the colonie
+ cumulativeGain  ; cumultative foragin sucess
+ breeder?        ; Booleen
+ speedCapability ; fling  speed
+ shyBold         ; shyBold gradient (boat attractivity)
+ boatDetectionRange       ; boad visibility distance
+ boatStatusDetectionRange ; distance where boat status is visible
+]
+
+boats-own [
+ boatType   ; fishing boad or other
+ status ; cruise or fishing
 ]
 
 to setup
   clear-all
   set af_borders gis:load-dataset "data/sng_cv.geojson"
+  set colonie-sf gis:load-dataset "data/colonie.geojson"
+  set epinect gis:load-dataset "data/epinect_map.asc"
   gis:set-world-envelope gis:envelope-of af_borders
+
+  gis:paint epinect white
+  gis:apply-raster epinect epinect-value
+  ask patches with[epinect-value >= 9.99][
+   set epinect-value ""
+  ]
+
+  ;; visualisation donnée SGI
   gis:set-drawing-color blue gis:draw af_borders 1
+  gis:set-drawing-color green gis:draw colonie-sf 10
+
 
   let CaboVerde gis:find-one-feature af_borders "AFF_ISO" "CV"
   gis:apply-coverage af_borders "COUNTRY" countryName
@@ -25,10 +55,30 @@ to setup
   ]
 
 
+;  ;; pour chaque vecteur dans la base
+;  foreach gis:feature-list-of colonie-sf [ point ->
+;    let location gis:location-of (first (first (gis:vertex-lists-of point)))
+;    ;; on créée une turtle à chaque position d’un point et on lui copie ses attributs
+;    create-birds 10 [
+;      ;set shape "dot"
+;      set size 30
+;      set color yellow
+;
+;    ]
+;  ]
+
 end
 
 
 to go
+  ask birds[
+    moveOnMap
+  ]
+
+end
+
+
+to moveOnMap
 
 end
 @#$#@#$#@
@@ -76,10 +126,30 @@ NIL
 NIL
 1
 
-@#$#@#$#@
-## WHAT IS IT?
+BUTTON
+46
+130
+109
+163
+NIL
+go
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
-(a general understanding of what the model is trying to show or explain)
+@#$#@#$#@
+## Question
+
+1. quelle est la propotion d'oiseau qui est capable de faire sont voyage alimentaire complet sans rentré en contact avec un bateau de pêche?
+	1. voyage de 14-20 jours (couvage des oeufs). Les oiseau ne se reproduisent pas toute l'année ...cette periode de 20j est très importantes pour l'écologie des oisseau.
+	2. nourriage de poussin (voyage plus court)
+2. 
 
 ## HOW IT WORKS
 
