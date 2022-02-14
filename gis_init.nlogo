@@ -44,28 +44,30 @@ to setup
   gis:set-drawing-color green gis:draw colonie-sf 10
 
 
-  let CaboVerde gis:find-one-feature af_borders "AFF_ISO" "CV"
-  gis:apply-coverage af_borders "COUNTRY" countryName
-
-  ask patches with[countryName = "Cabo Verde"][
-   sprout 1 [
-     set shape "dot"
-      set color yellow
-    ]
-  ]
-
-
-;  ;; pour chaque vecteur dans la base
-;  foreach gis:feature-list-of colonie-sf [ point ->
-;    let location gis:location-of (first (first (gis:vertex-lists-of point)))
-;    ;; on créée une turtle à chaque position d’un point et on lui copie ses attributs
-;    create-birds 10 [
-;      ;set shape "dot"
-;      set size 30
-;      set color yellow
+;  let CaboVerde gis:find-one-feature af_borders "AFF_ISO" "CV"
+;  gis:apply-coverage af_borders "COUNTRY" countryName
 ;
+;  ask patches with[countryName = "Cabo Verde"][
+;   sprout 1 [
+;     set shape "dot"
+;      set color yellow
 ;    ]
 ;  ]
+
+
+  ;; pour chaque vecteur dans la base
+  foreach gis:feature-list-of colonie-sf [ point ->
+    let location gis:location-of (first (first (gis:vertex-lists-of point)))
+    show first location
+    ;; on créée une turtle à chaque position d’un point et on lui copie ses attributs
+    create-birds 10 [
+      set shape "dot"
+      setxy (first location) (last location)
+      set size 10
+      set color yellow
+      set pen-mode "down"
+    ]
+  ]
 
 end
 
@@ -79,8 +81,20 @@ end
 
 
 to moveOnMap
+  ;; test 1
+  ;; tombe dans des minimum locaux
+;  let patches-neig patches in-radius 2
+;  let medPatchesNeig median [epinect-value] of patches-neig
+;  let bestOptions patches-neig with[epinect-value >= medPatchesNeig]
+;  let oneOrientation one-of bestOptions
+;  face oneOrientation
+;  fd 1
+
+  ;; test 2
+  ;;
 
 end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -96,8 +110,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-1
-1
+0
+0
 1
 0
 240
