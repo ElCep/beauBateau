@@ -8,6 +8,9 @@ globals [
   colonie-sf
   epinect
   tampon
+  ;; birds gloabl variables
+  alpha
+  minstep
 ]
 
 patches-own [
@@ -34,7 +37,7 @@ boats-own [
 
 to setup
   clear-all
-
+  set alpha 1.5 set minstep 0.2 ;or whatever
   ;; load GIS data
   set af_borders gis:load-dataset "data/sng_cv.geojson"
   set colonie-sf gis:load-dataset "data/colonie.geojson"
@@ -104,10 +107,26 @@ to moveOnMap
 ;  fd 1
 
   ;; test 2
-  ;;
+  ;; using Correlated Random Walk
+
+  set heading random-float 360
+  fd minstep * (random-float 1) ^ (-1 / alpha)
 
 end
 
+to-report randomAngleTriangular [
+  #maxAngle  ;(number) angle in degrees
+  ]
+  let _maxAngle abs #maxAngle
+  if (_maxAngle > 180) [
+    set _maxAngle 180
+  ]
+  report (2 * randomStandardTriangular - 1) * _maxAngle
+end
+
+to-report randomStandardTriangular
+  report (random-float 1 + (1 - random-float 1)) / 2
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
