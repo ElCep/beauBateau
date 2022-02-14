@@ -3,11 +3,17 @@ extensions [gis ]
 breed [ birds bird ]
 breed [boats boat]
 
-globals [ af_borders colonie-sf epinect]
+globals [
+  af_borders
+  colonie-sf
+  epinect
+  tampon
+]
 
 patches-own [
  countryName
  epinect-value
+ potentialTarget?
 ]
 
 birds-own [
@@ -28,34 +34,39 @@ boats-own [
 
 to setup
   clear-all
+
+  ;; load GIS data
   set af_borders gis:load-dataset "data/sng_cv.geojson"
   set colonie-sf gis:load-dataset "data/colonie.geojson"
   set epinect gis:load-dataset "data/epinect_map.asc"
+  set tampon gis:load-dataset "data/tampon.geojson"
   gis:set-world-envelope gis:envelope-of af_borders
 
-  gis:paint epinect white
+  ;put raster data in patches variable
   gis:apply-raster epinect epinect-value
+
+  ; update patche variables (remove land)
   ask patches with[epinect-value >= 9.99][
    set epinect-value ""
   ]
 
-  ;; visualisation donnée SGI
+  ; define patches color based on plancton
+  ask patches with[epinect-value != ""][
+   set pcolor scale-color red epinect-value 0.0 8.0
+  ]
+  ;; draw GIS line for memory
   gis:set-drawing-color blue gis:draw af_borders 1
+  gis:set-drawing-color red gis:draw tampon 1
   gis:set-drawing-color green gis:draw colonie-sf 10
 
+  ;; create a subset of patch continental shelf
+  let p1 patches gis:intersecting tampon
+  ask p1 with[epinect-value != ""][
+    set potentialTarget? true
+  ]
 
-;  let CaboVerde gis:find-one-feature af_borders "AFF_ISO" "CV"
-;  gis:apply-coverage af_borders "COUNTRY" countryName
-;
-;  ask patches with[countryName = "Cabo Verde"][
-;   sprout 1 [
-;     set shape "dot"
-;      set color yellow
-;    ]
-;  ]
-
-
-  ;; pour chaque vecteur dans la base
+  ;; pour chaque point vecteur dans la base on crée N agents
+  ;; (on en a qu'un seul ici )
   foreach gis:feature-list-of colonie-sf [ point ->
     let location gis:location-of (first (first (gis:vertex-lists-of point)))
     show first location
@@ -68,6 +79,8 @@ to setup
       set pen-mode "down"
     ]
   ]
+
+  ;; definir des localisation de target pour les oiseaux
 
 end
 
